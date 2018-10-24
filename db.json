@@ -1,3 +1,14 @@
 {
-  "img": []
+  "img": [
+    {
+      "md5": "b084b5c4689e5c46fb34f2c76583b39b",
+      "name": "banner_board_sprite.png",
+      "url": "https://img10.360buyimg.com/opr/jfs/t27202/267/1246346063/14238/29da1127/5bc4549dNacf14ece.png"
+    },
+    {
+      "md5": "449fdb606c1b2108bb10a27876131466",
+      "name": "character_sprite.png",
+      "url": "https://img11.360buyimg.com/opr/jfs/t27097/365/1275283285/90270/d53f3cd5/5bc4549dN54687808.png"
+    }
+  ]
 }

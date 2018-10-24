@@ -1,17 +1,18 @@
-var projConfig = require('./proj.config.js');
-var webpack = require("webpack");
+var path = require('path');
+var webpack = require('webpack');
 
 var config = {
   entry: "./src/js/index.js",
   output: {
-    path: __dirname + "/dist/js/",
+    path: path.resolve(__dirname, "dist/js"),
     filename: "index.js"
   },
   module: {
     rules: [
       {
         test: /\.js$/,
-        exclude: /(node_modules|bower_components)/
+        exclude: /(node_modules|bower_components)/,
+        loader: "babel-loader"
       },
       {
         test: /\.vue$/,
@@ -20,8 +21,9 @@ var config = {
     ]
   },
   plugins: [
-    new webpack.ProvidePlugin({
-      Promise: "promise-polyfill"
+    new webpack.optimize.AggressiveSplittingPlugin({
+      minSize: 50 * 1024,
+      maxSize: 100 * 1024
     })
   ],
   resolve: {
@@ -35,12 +37,5 @@ var config = {
   },
   devtool: "source-map"
 };
-
-if(projConfig.mergeCss){
-  config.module.loaders.push({
-    test: /\.css$/,
-    loader: 'style!css'
-  });
-}
 
 module.exports = config;

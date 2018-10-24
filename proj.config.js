@@ -1,4 +1,5 @@
 module.exports = {
   mergeCss: false,
-  useCDNImg: true
+  useCDNImg: true,
+  useTiny: true
 };
