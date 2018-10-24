@@ -59,7 +59,7 @@ function animate(){
     gridArray.push(grid[i].y);
   }
   let dataArray = new Float32Array(gridArray.concat([point.x, point.y]));
-  window.renderer.setAttribute(window.renderer.pointProgram, "a_position", dataArray, 2, "FLOAT");
+  window.renderer.setAttribute(window.renderer.pointProgram, "a_Position", dataArray, 2, "FLOAT");
   window.renderer.update(grid.length + 1);
   requestAnimationFrame(animate);
   stats && stats.end();

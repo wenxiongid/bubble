@@ -55,7 +55,7 @@ class Renderer {
     );
     this.setAttribute(
       this.sceneProgram,
-      "a_position",
+      "a_Position",
       new Float32Array([
         -1.0,
         -1.0,
@@ -171,7 +171,7 @@ class Renderer {
         375 / 1024,
         812 / 1024
       ]), 2, "FLOAT");
-    this.setAttribute(this.sceneProgram, "a_position", new Float32Array([
+    this.setAttribute(this.sceneProgram, "a_Position", new Float32Array([
         -1.0,
         -1.0,
 

@@ -1,5 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
+var HtmlWebpackPlugin = require("html-webpack-plugin");
 
 var config = {
   entry: "./src/js/index.js",
@@ -24,6 +25,10 @@ var config = {
     new webpack.optimize.AggressiveSplittingPlugin({
       minSize: 50 * 1024,
       maxSize: 100 * 1024
+    }),
+    new HtmlWebpackPlugin({
+      template: "src/index.html",
+      filename: "../index.html"
     })
   ],
   resolve: {
