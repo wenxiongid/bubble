@@ -22,14 +22,14 @@ var config = {
     ]
   },
   plugins: [
-    new webpack.optimize.AggressiveSplittingPlugin({
-      minSize: 50 * 1024,
-      maxSize: 100 * 1024
-    }),
-    new HtmlWebpackPlugin({
-      template: "src/index.html",
-      filename: "../index.html"
-    })
+    // new webpack.optimize.AggressiveSplittingPlugin({
+    //   minSize: 50 * 1024,
+    //   maxSize: 100 * 1024
+    // }),
+    // new HtmlWebpackPlugin({
+    //   template: "src/index.html",
+    //   filename: "../index.html"
+    // })
   ],
   resolve: {
     extensions: [".js", ".vue"],

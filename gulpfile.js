@@ -86,40 +86,48 @@ gulp.task('sprite', function(callback){
   var toDoCount = 0;
   var finishCount = 0;
   fs.readdir(imgPath, function(readErr, files){
-    files.forEach(function(name){
-      if(name.indexOf('sprite_') === 0){
-        var spriteDirPath = path.resolve(imgPath, name);
-        fs.stat(spriteDirPath, function(statErr, stat){
-          if (stat.isDirectory()){
-            toDoCount++;
-            var spritePattern = path.resolve(spriteDirPath, '*.png');
-            var folderName = name.replace('sprite_', '');
-            var spriteData = gulp.src(spritePattern)
-              .pipe(spritesmith({
-                imgName: folderName + '_sprite.png',
-                cssName: folderName + '_sprite.sass',
-                padding: 10,
-                imgPath: '../img/' + folderName + '_sprite.png',
-                algorithm: 'top-down',
-                cssVarMap: function(sprite){
-                  sprite.name = `${folderName}_${sprite.name}`
-                },
-                cssTemplate: './template.sass'
-              }));
-            var imgStream = spriteData.img
-              .pipe(gulp.dest(imgPath));
-            var cssStream = spriteData.css
-              .pipe(gulp.dest(sassPath));
-            merge(imgStream, cssStream).on('finish', function(){
-              finishCount++;
-              if(finishCount == toDoCount){
-                callback();
-              }
-            });
+    if(files.length > 0){
+      files.forEach(function (name) {
+        if (name.indexOf('sprite_') === 0) {
+          var spriteDirPath = path.resolve(imgPath, name);
+          fs.stat(spriteDirPath, function (statErr, stat) {
+            if (stat.isDirectory()) {
+              toDoCount++;
+              var spritePattern = path.resolve(spriteDirPath, '*.png');
+              var folderName = name.replace('sprite_', '');
+              var spriteData = gulp.src(spritePattern)
+                .pipe(spritesmith({
+                  imgName: folderName + '_sprite.png',
+                  cssName: folderName + '_sprite.sass',
+                  padding: 10,
+                  imgPath: '../img/' + folderName + '_sprite.png',
+                  algorithm: 'top-down',
+                  cssVarMap: function (sprite) {
+                    sprite.name = `${folderName}_${sprite.name}`
+                  },
+                  cssTemplate: './template.sass'
+                }));
+              var imgStream = spriteData.img
+                .pipe(gulp.dest(imgPath));
+              var cssStream = spriteData.css
+                .pipe(gulp.dest(sassPath));
+              merge(imgStream, cssStream).on('finish', function () {
+                finishCount++;
+                if (finishCount == toDoCount) {
+                  callback();
+                }
+              });
+            }
+          });
+        }else{
+          if (finishCount == toDoCount) {
+            callback();
           }
-        });
-      }
-    });
+        }
+      });
+    }else{
+      callback();
+    }
   });
 });
 
@@ -145,9 +153,6 @@ gulp.task('watch-css', function(callback){
     path.resolve(srcPath, 'img', '**.*'),
     path.resolve(srcPath, 'sass', '*.sass')
   ], ['css']);
-  watcher.on('change', function(e){
-    log("File " + e.path + " was " + e.type + ", running tasks...");
-  });
   callback();
 });
 

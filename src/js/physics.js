@@ -2,33 +2,38 @@ import decomp from "poly-decomp";
 window.decomp = decomp;
 import Matter from "matter-js";
 
-let Engine = Matter.Engine,
+const debug = false;
+
+const Engine = Matter.Engine,
   Render = Matter.Render,
   Svg = Matter.Svg,
   World = Matter.World,
   Bodies = Matter.Bodies,
   Body = Matter.Body,
-  Vector = Matter.Vector;
+  Vector = Matter.Vector,
+  Composite = Matter.Composite;
 
 class Physics{
-  constructor(target, sceneSize, wallWidth, birthPos, startV){
+  constructor(target, sceneSize, wallWidth){
     this.target = target;
     this.sceneSize = sceneSize;
     this.wallWidth = wallWidth;
-    this.birthPos = birthPos;
-    this.startV = startV;
 
     this.engine = Engine.create();
     this.engine.world.gravity.y = -1;
 
-    this.render = Render.create({
-      element: target,
-      engine: this.engine,
-      options: {
-        width: sceneSize.width,
-        height: sceneSize.height
-      }
-    });
+    if(debug){
+      this.render = Render.create({
+        element: target,
+        engine: this.engine,
+        options: {
+          width: sceneSize.width,
+          height: sceneSize.height,
+          background: 'transparent',
+          wireframeBackground: 'transparent'
+        }
+      });
+    }
 
     // add top
     let path = document.getElementById('path');
@@ -80,30 +85,39 @@ class Physics{
     ]);
 
     Engine.run(this.engine);
-    Render.run(this.render);
+    if(debug){
+      Render.run(this.render);
+    }
   }
-  createball(x, y, radius){
+  createBall(x, y, radius, isStatic){
     let ball = Bodies.circle(x, y, radius, {
-      restitution: 0.5
+      isStatic,
+      restitution: 0.1,
+      name: 'myBall'
     });
+    if(isStatic){
+      this.stillBall = ball;
+    }
     World.add(this.engine.world, [ball]);
   }
-  addStillBall(radius){
-    this.stillBall = Bodies.circle(this.birthPos.x, this.birthPos.y, radius, {
-      isStatic: true,
-      restitution: 0.5
-    });
-    World.add(this.engine.world, [this.stillBall]);
-  }
-  shoot(pos, newBallRadius){
+  shoot(pos, startV){
     if (this.stillBall) {
-      let v = Vector.create(pos.x - this.birthPos.x, pos.y - this.birthPos.y);
+      let v = Vector.create(pos.x - this.stillBall.position.x, pos.y - this.stillBall.position.y);
       v = Vector.normalise(v);
-      v = Vector.mult(v, this.startV);
+      v = Vector.mult(v, startV);
       Body.setStatic(this.stillBall, false);
       Body.setVelocity(this.stillBall, v);
-      this.addStillBall(newBallRadius);
     }
+  }
+  getAllBall(){
+    let bodies = Composite.allBodies(this.engine.world);
+    let ballList = [];
+    bodies.forEach(body => {
+      if(body.name == 'myBall'){
+        ballList.push(body);
+      }
+    });
+    return ballList;
   }
 }
 
