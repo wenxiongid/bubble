@@ -23,15 +23,17 @@ class Renderer{
       });
     });
   }
-  updateData(data){
+  updateData(posData, levelData){
     let _this = this;
-    _this.dataArray = new Float32Array(data);
+    _this.posDataArray = new Float32Array(posData);
+    _this.levelDataArray = new Float32Array(levelData);
   }
   draw(){
     let _this = this;
     if(_this.isInit){
-      _this.glRenderer.setAttribute(_this.glRenderer.pointProgram, "a_Position", _this.dataArray, 2, "FLOAT");
-      _this.glRenderer.update(_this.dataArray.length / 2);
+      _this.glRenderer.setAttribute(_this.glRenderer.pointProgram, "a_Position", _this.posDataArray, 2, "FLOAT");
+      _this.glRenderer.setAttribute(_this.glRenderer.pointProgram, "a_Level", _this.levelDataArray, 1, "FLOAT");
+      _this.glRenderer.update(_this.levelDataArray.length);
     }
   }
 }

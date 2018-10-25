@@ -3,6 +3,13 @@ import {
   getResponseDist
 } from './helper';
 
+import BallRadiusMap from './game_param';
+
+function randomLevel(){
+  return 1;
+  return Math.ceil(Math.random() * 3);
+}
+
 class Game{
   constructor(canvas){
     let _this = this;
@@ -18,9 +25,8 @@ class Game{
       x: getResponseDist(375 / 2),
       y: sceneSize.height * 0.8
     };
-    _this.ballRadius = getResponseDist(20);
 
-    _this.addStillBall(_this.ballRadius);
+    _this.addStillBall(randomLevel());
     // test end
     document.addEventListener('touchend', function (e) {
       let pos = {};
@@ -36,24 +42,26 @@ class Game{
           y: e.changedTouches[0].pageY
         };
       }
-      _this.shoot(pos, _this.ballRadius);
+      _this.shoot(pos, randomLevel());
     }, false);
   }
-  createBall(x, y, radius){
+  createBall(x, y, radius, level){
     let _this = this;
     _this.engine.createBall({
       x,
       y
-    }, radius);
+    }, radius, level);
   }
-  addStillBall(radius){
+  addStillBall(level){
     let _this = this;
-    _this.engine.addStillBall(_this.birthPos, radius);
+    let radius = BallRadiusMap[level];
+    _this.engine.addStillBall(_this.birthPos, radius, level);
+    console.log('still level:', level);
   }
-  shoot(pos, newBallRadius){
+  shoot(pos, newBallLevel){
     let _this = this;
     _this.engine.shoot(pos, _this.startV);
-    _this.engine.addStillBall(_this.birthPos, newBallRadius);
+    _this.addStillBall(newBallLevel);
   }
   update(){
     let _this = this;

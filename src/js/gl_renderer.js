@@ -20,7 +20,7 @@ class GLRenderer {
 
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
     this.gl.enable(this.gl.BLEND);
-    this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    this.gl.clearColor(0.0, 0.0, 0.0, 0.0);
 
     this.fbo = this.initFramebufferObject(this.gl);
     if (!this.fbo) {
@@ -119,7 +119,7 @@ class GLRenderer {
   setAttribute(program, name, data, num, typeName) {
     // console.log(name, data);
     let location;
-    if (program.attributeLocation[name]) {
+    if (program.attributeLocation[name] && program.attributeLocation[name] >= 0) {
       location = program.attributeLocation[name];
     } else {
       location = this.gl.getAttribLocation(program, name);

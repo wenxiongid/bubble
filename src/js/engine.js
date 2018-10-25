@@ -22,14 +22,14 @@ class Engine {
       });
     });
   }
-  createBall(pos, radius){
+  createBall(pos, radius, level){
     let _this = this;
-    _this.physics.createBall(pos.x, pos.y, radius);
+    _this.physics.createBall(pos.x, pos.y, radius, level);
     _this.updateRendererData();
   }
-  addStillBall(pos, radius){
+  addStillBall(pos, radius, level){
     let _this = this;
-    _this.physics.createBall(pos.x, pos.y, radius, true);
+    _this.physics.createBall(pos.x, pos.y, radius, level, true);
     _this.updateRendererData();
   }
   shoot(pos, startV){
@@ -39,12 +39,14 @@ class Engine {
   updateRendererData(){
     let _this = this;
     let posList = [];
+    let levelList = [];
     _this.physics.getAllBall().forEach(ball => {
       let coord = px2coord(ball.position.x, ball.position.y, _this.sceneSize.width, _this.sceneSize.height);
       posList.push(coord.u);
       posList.push(coord.v);
+      levelList.push(ball.level);
     });
-    _this.renderer.updateData(posList);
+    _this.renderer.updateData(posList, levelList);
   }
   update() {
     let _this = this;

@@ -1,8 +1,11 @@
 import decomp from "poly-decomp";
 window.decomp = decomp;
 import Matter from "matter-js";
+import BallRadiusMap from "./game_param";
 
-const debug = false;
+const debug = true;
+
+const MyBall = 'myBall';
 
 const Engine = Matter.Engine,
   Render = Matter.Render,
@@ -11,10 +14,12 @@ const Engine = Matter.Engine,
   Bodies = Matter.Bodies,
   Body = Matter.Body,
   Vector = Matter.Vector,
-  Composite = Matter.Composite;
+  Composite = Matter.Composite,
+  Events = Matter.Events;
 
 class Physics{
   constructor(target, sceneSize, wallWidth){
+    let _this = this;
     this.target = target;
     this.sceneSize = sceneSize;
     this.wallWidth = wallWidth;
@@ -84,16 +89,43 @@ class Physics{
       )
     ]);
 
+    Events.on(this.engine, "collisionStart", event => {
+      event.pairs.forEach(pair => {
+        let bodyA = pair.bodyA,
+          bodyB = pair.bodyB;
+        if (bodyA.name == MyBall && bodyB.name == MyBall && !bodyA.isStatic && !bodyB.isStatic && bodyA.level == bodyB.level && bodyA.level < 7) {
+          let targetBody,
+            srcBody;
+          if(bodyA.position.y < bodyB.position.y){
+            targetBody = bodyA;
+            srcBody = bodyB;
+          }else{
+            targetBody = bodyB;
+            srcBody = bodyA;
+          }
+          let newLevel = Math.min(targetBody.level + 1, 7);
+          let scale = BallRadiusMap[newLevel] / BallRadiusMap[targetBody.level];
+          Body.scale(targetBody, scale, scale);
+          Body.set(targetBody, {
+            level: newLevel
+          });
+          Body.translate(targetBody, Vector.create(0, 10));
+          World.remove(_this.engine.world, srcBody);
+        }
+      });
+    });
+
     Engine.run(this.engine);
     if(debug){
       Render.run(this.render);
     }
   }
-  createBall(x, y, radius, isStatic){
+  createBall(x, y, radius, level, isStatic){
     let ball = Bodies.circle(x, y, radius, {
       isStatic,
-      restitution: 0.1,
-      name: 'myBall'
+      restitution: 0,
+      name: MyBall,
+      level
     });
     if(isStatic){
       this.stillBall = ball;
@@ -113,7 +145,7 @@ class Physics{
     let bodies = Composite.allBodies(this.engine.world);
     let ballList = [];
     bodies.forEach(body => {
-      if(body.name == 'myBall'){
+      if (body.name == MyBall){
         ballList.push(body);
       }
     });
