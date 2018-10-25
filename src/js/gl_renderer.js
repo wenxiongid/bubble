@@ -20,7 +20,7 @@ class GLRenderer {
 
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
     this.gl.enable(this.gl.BLEND);
-    this.gl.clearColor(0.0, 0.0, 0.0, 0.0);
+    this.gl.clearColor(0, 0, 0, 0.0);
 
     this.fbo = this.initFramebufferObject(this.gl);
     if (!this.fbo) {

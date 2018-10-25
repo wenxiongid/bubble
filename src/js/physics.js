@@ -3,7 +3,7 @@ window.decomp = decomp;
 import Matter from "matter-js";
 import BallRadiusMap from "./game_param";
 
-const debug = true;
+const debug = false;
 
 const MyBall = 'myBall';
 
@@ -109,7 +109,7 @@ class Physics{
           Body.set(targetBody, {
             level: newLevel
           });
-          Body.translate(targetBody, Vector.create(0, 10));
+          Body.translate(targetBody, Vector.create(0, -10));
           World.remove(_this.engine.world, srcBody);
         }
       });

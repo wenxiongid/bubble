@@ -6,7 +6,7 @@ import {
 import BallRadiusMap from './game_param';
 
 function randomLevel(){
-  return 1;
+  // return 6;
   return Math.ceil(Math.random() * 3);
 }
 
