@@ -8,7 +8,7 @@ uniform vec2 u_resolution;
 
 void main(){
   vec4 mapColor = texture2D(u_sceneMap, v_texcoord);
-  float d = smoothstep(0.695, 0.70, mapColor.a);
-  gl_FragColor = mapColor.rgba * d;
+  float d = smoothstep(0.65, 0.7, mapColor.a);
+  gl_FragColor = vec4(mapColor.rgb, d);
   // gl_FragColor = mapColor;
 }

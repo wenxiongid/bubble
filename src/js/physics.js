@@ -3,7 +3,7 @@ window.decomp = decomp;
 import Matter from "matter-js";
 import BallRadiusMap from "./game_param";
 
-const debug = true;
+const debug = false;
 
 const MyBall = 'myBall';
 
@@ -92,43 +92,82 @@ class Physics{
       )
     ]);
 
-    _this.nextFrameMoveBodies = [];
     Events.on(this.engine, 'beforeUpdate', event => {
-      _this.nextFrameMoveBodies.forEach(body => {
-        Body.translate(body, Vector.create(0, 10));
-      });
-      _this.nextFrameMoveBodies = [];
-    });
-
-    Events.on(this.engine, "collisionStart", event => {
-      event.pairs.forEach(pair => {
-        let bodyA = pair.bodyA,
-          bodyB = pair.bodyB;
-        if (bodyA.name == MyBall && bodyB.name == MyBall && !bodyA.isStatic && !bodyB.isStatic && bodyA.level == bodyB.level && bodyA.level < 7) {
-          let targetBody,
-            srcBody;
-          if(bodyA.position.y < bodyB.position.y){
-            targetBody = bodyA;
-            srcBody = bodyB;
-          }else{
-            targetBody = bodyB;
-            srcBody = bodyA;
-          }
-          let newLevel = Math.min(targetBody.level + 1, 7);
-          let scale = BallRadiusMap[newLevel] / BallRadiusMap[targetBody.level];
-          Body.scale(targetBody, scale, scale);
-          Body.set(targetBody, {
-            level: newLevel
-          });
-          _this.nextFrameMoveBodies.push(targetBody);
-          World.remove(_this.engine.world, srcBody);
-        }
-      });
+      let collisionInfo = _this.checkCollision();
+      if(collisionInfo){
+        _this.collisionInfo = collisionInfo;
+      }
+      if(_this.collisionInfo){
+        _this.mergeBall(_this.collisionInfo.srcBody, _this.collisionInfo.targetBody);
+      }
     });
 
     Engine.run(this.engine);
     if(debug){
       Render.run(this.render);
+    }
+  }
+  getDistSq(posA, posB){
+    return (posA.x - posB.x) * (posA.x - posB.x) + (posA.y - posA.y) * (posA.y - posA.y);
+  }
+  mergeBall(srcBody, targetBody){
+    let _this = this;
+    let dist = Math.sqrt(_this.getDistSq(srcBody.position, targetBody.position));
+    if(dist < 1){
+      let newLevel = Math.min(targetBody.level + 1, 7);
+      let scale = BallRadiusMap[newLevel] / BallRadiusMap[targetBody.level];
+      Body.scale(targetBody, scale, scale);
+      Body.set(targetBody, { level: newLevel });
+      World.remove(_this.engine.world, srcBody);
+      _this.collisionInfo = false;
+      return;
+    }
+    let velovity = {
+      x: targetBody.position.x - srcBody.position.x,
+      y: targetBody.position.y - srcBody.position.y
+    };
+    velovity.x /= dist;
+    velovity.y /= dist;
+    Body.translate(srcBody, Vector.create(velovity));
+  }
+  checkCollision(){
+    let _this = this;
+    let bodies = _this.getAllBall();
+    let isFoundCollision = false;
+    let targetBody,
+      srcBody;
+    if(_this.isMerging){
+      return false;
+    }
+    for(let i = 0; i < bodies.length; i++){
+      let bodyA = bodies[i];
+      if(!bodyA.isStatic && !bodyA.isMerging){
+        for(let j = i + 1; j < bodies.length; j++){
+          let bodyB = bodies[j];
+          if (!bodyB.isStatic && !bodyB.isMerging && bodyA.level == bodyB.level && _this.getDistSq(bodyA.position, bodyB.position) <= 4 * bodyA.circleRadius * bodyA.circleRadius) {
+            if (bodyA.position.y < bodyB.position.y) {
+              targetBody = bodyA;
+              srcBody = bodyB;
+            } else {
+              targetBody = bodyB;
+              srcBody = bodyA;
+            }
+            isFoundCollision = true;
+            break;
+          }
+        }
+      }
+      if(isFoundCollision){
+        break;
+      }
+    }
+    if(isFoundCollision){
+      return {
+        srcBody,
+        targetBody
+      };
+    }else{
+      return false;
     }
   }
   createBall(x, y, radius, level, isStatic){
