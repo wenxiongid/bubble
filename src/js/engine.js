@@ -40,13 +40,15 @@ class Engine {
     let _this = this;
     let posList = [];
     let levelList = [];
+    let sizeList = [];
     _this.physics.getAllBall().forEach(ball => {
       let coord = px2coord(ball.position.x, ball.position.y, _this.sceneSize.width, _this.sceneSize.height);
       posList.push(coord.u);
       posList.push(coord.v);
       levelList.push(ball.level);
+      sizeList.push(ball.circleRadius * 4);
     });
-    _this.renderer.updateData(posList, levelList);
+    _this.renderer.updateData(posList, levelList, sizeList);
   }
   update() {
     let _this = this;

@@ -3,7 +3,7 @@ window.decomp = decomp;
 import Matter from "matter-js";
 import BallRadiusMap from "./game_param";
 
-const debug = false;
+const debug = true;
 
 const MyBall = 'myBall';
 
@@ -14,6 +14,7 @@ const Engine = Matter.Engine,
   Bodies = Matter.Bodies,
   Body = Matter.Body,
   Vector = Matter.Vector,
+  Vertices = Matter.Vertices,
   Composite = Matter.Composite,
   Events = Matter.Events;
 
@@ -40,9 +41,11 @@ class Physics{
       });
     }
 
-    // add top
+    // add proof
     let path = document.getElementById('path');
     let points = Svg.pathToVertices(path, 30);
+    let scale = sceneSize.width / 375;
+    Vertices.scale(points, scale, scale);
     World.add(
       this.engine.world,
       Bodies.fromVertices(
@@ -89,6 +92,14 @@ class Physics{
       )
     ]);
 
+    _this.nextFrameMoveBodies = [];
+    Events.on(this.engine, 'beforeUpdate', event => {
+      _this.nextFrameMoveBodies.forEach(body => {
+        Body.translate(body, Vector.create(0, 10));
+      });
+      _this.nextFrameMoveBodies = [];
+    });
+
     Events.on(this.engine, "collisionStart", event => {
       event.pairs.forEach(pair => {
         let bodyA = pair.bodyA,
@@ -109,7 +120,7 @@ class Physics{
           Body.set(targetBody, {
             level: newLevel
           });
-          Body.translate(targetBody, Vector.create(0, -10));
+          _this.nextFrameMoveBodies.push(targetBody);
           World.remove(_this.engine.world, srcBody);
         }
       });
