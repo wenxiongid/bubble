@@ -96,12 +96,13 @@ class Physics{
     ]);
 
     Events.on(this.engine, 'beforeUpdate', event => {
-      let collisionInfo = _this.checkCollision();
-      if(collisionInfo){
-        _this.collisionInfo = collisionInfo;
+      if(!_this.collisionInfo){
+        _this.collisionInfo = _this.checkCollision();
       }
       if(_this.collisionInfo){
-        _this.mergeBall(_this.collisionInfo.srcBody, _this.collisionInfo.targetBody);
+        _this.mergeBall(_this.collisionInfo.srcBody, _this.collisionInfo.targetBody, () => {
+          _this.collisionInfo = null;
+        });
       }
     });
 
@@ -113,7 +114,7 @@ class Physics{
   getDistSq(posA, posB){
     return (posA.x - posB.x) * (posA.x - posB.x) + (posA.y - posB.y) * (posA.y - posB.y);
   }
-  mergeBall(srcBody, targetBody){
+  mergeBall(srcBody, targetBody, callback){
     let _this = this;
     let dist = Math.sqrt(_this.getDistSq(srcBody.position, targetBody.position));
     if(dist < srcBody.circleRadius + targetBody.circleRadius + 5){
@@ -125,8 +126,7 @@ class Physics{
         Body.scale(targetBody, scale, scale);
         Body.set(targetBody, { level: newLevel });
         World.remove(_this.engine.world, srcBody);
-        _this.collisionInfo = false;
-        _this.isMerging = false;
+        callback && callback();
         return;
       }
       let velovity = {
@@ -144,9 +144,6 @@ class Physics{
     let isFoundCollision = false;
     let targetBody,
       srcBody;
-    if(_this.isMerging){
-      return false;
-    }
     for(let i = 0; i < bodies.length; i++){
       let bodyA = bodies[i];
       if(!bodyA.isStatic && !bodyA.isMerging){
