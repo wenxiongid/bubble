@@ -7,6 +7,9 @@ const debug = false;
 
 const MyBall = 'myBall';
 
+const defaultCategory = 0x0001,
+  mergeCategory = 0x0002;
+
 const Engine = Matter.Engine,
   Render = Matter.Render,
   Svg = Matter.Svg,
@@ -108,27 +111,32 @@ class Physics{
     }
   }
   getDistSq(posA, posB){
-    return (posA.x - posB.x) * (posA.x - posB.x) + (posA.y - posA.y) * (posA.y - posA.y);
+    return (posA.x - posB.x) * (posA.x - posB.x) + (posA.y - posB.y) * (posA.y - posB.y);
   }
   mergeBall(srcBody, targetBody){
     let _this = this;
     let dist = Math.sqrt(_this.getDistSq(srcBody.position, targetBody.position));
-    if(dist < 1){
-      let newLevel = Math.min(targetBody.level + 1, 7);
-      let scale = BallRadiusMap[newLevel] / BallRadiusMap[targetBody.level];
-      Body.scale(targetBody, scale, scale);
-      Body.set(targetBody, { level: newLevel });
-      World.remove(_this.engine.world, srcBody);
-      _this.collisionInfo = false;
-      return;
+    if(dist < srcBody.circleRadius + targetBody.circleRadius + 5){
+      Body.setStatic(srcBody, true);
+      srcBody.collisionFilter.mask = mergeCategory;
+      if (dist < 5) {
+        let newLevel = Math.min(targetBody.level + 1, 7);
+        let scale = BallRadiusMap[newLevel] / BallRadiusMap[targetBody.level];
+        Body.scale(targetBody, scale, scale);
+        Body.set(targetBody, { level: newLevel });
+        World.remove(_this.engine.world, srcBody);
+        _this.collisionInfo = false;
+        _this.isMerging = false;
+        return;
+      }
+      let velovity = {
+        x: targetBody.position.x - srcBody.position.x,
+        y: targetBody.position.y - srcBody.position.y
+      };
+      velovity.x /= dist / 8;
+      velovity.y /= dist / 8;
+      Body.translate(srcBody, Vector.create(velovity.x, velovity.y));
     }
-    let velovity = {
-      x: targetBody.position.x - srcBody.position.x,
-      y: targetBody.position.y - srcBody.position.y
-    };
-    velovity.x /= dist;
-    velovity.y /= dist;
-    Body.translate(srcBody, Vector.create(velovity));
   }
   checkCollision(){
     let _this = this;
@@ -153,6 +161,7 @@ class Physics{
               srcBody = bodyA;
             }
             isFoundCollision = true;
+            _this.isMerging = true;
             break;
           }
         }
@@ -172,6 +181,9 @@ class Physics{
   }
   createBall(x, y, radius, level, isStatic){
     let ball = Bodies.circle(x, y, radius, {
+      collisionFilter: {
+        mask: defaultCategory
+      },
       isStatic,
       restitution: 0,
       name: MyBall,
