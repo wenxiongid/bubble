@@ -3,11 +3,11 @@ import Game from './game';
 
 var stats;
 
-// if (window.Stats) {
-//   stats = new Stats();
-//   stats.showPanel(0);
-//   document.body.appendChild(stats.dom);
-// }
+if (window.Stats) {
+  stats = new Stats();
+  stats.showPanel(0);
+  document.body.appendChild(stats.dom);
+}
 let canvas = getResizeEl(document.getElementById("webgl"));
 let myGame = new Game(canvas);
 animate();

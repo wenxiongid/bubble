@@ -354,7 +354,8 @@ gulp.task('zip', function(callback){
 });
 
 gulp.task('default', function(callback){
-  runSequence('clean', ['webpack', 'css'], 'replace-cdn', ['uglify', 'clean-css'], 'zip', callback);
+  // runSequence("clean", ["webpack", "css"], "replace-cdn", "clean-css", "zip", callback);
+  runSequence(['webpack', 'css'], 'replace-cdn', 'clean-css', 'zip', callback);
 });
 
 gulp.task('dev', function(callback){

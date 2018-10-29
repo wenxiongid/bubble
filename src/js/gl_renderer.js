@@ -1,9 +1,17 @@
 const MAPSIZE = 1024;
 
+const LEVELGROUP = {
+  LOW: 0,
+  MID: 1,
+  HIGH: 2
+};
+
 class GLRenderer {
   constructor(canvas, vshader, fshader, sceneVShader, sceneFShader) {
     this.canvas = canvas;
-    this.gl = getWebGLContext(canvas);
+    this.gl = getWebGLContext(canvas, {
+      preserveDrawingBuffer: true
+    });
     if (!this.gl) {
       console.log("Failed to get the rendering context for WebGL");
       return;
@@ -22,7 +30,7 @@ class GLRenderer {
     this.gl.enable(this.gl.BLEND);
     this.gl.clearColor(0, 0, 0, 0.0);
 
-    this.fbo = this.initFramebufferObject(this.gl);
+    this.fbo = this.initFramebufferObject();
     if (!this.fbo) {
       console.log("Failed to intialize the framebuffer object (FBO)");
       return;
@@ -142,21 +150,24 @@ class GLRenderer {
 
     return true;
   }
-  drawPoint(count) {
+  drawPoint(group, count) {
     let _this = this;
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.fbo);
     // this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     this.gl.viewport(0, 0, _this.canvas.width, _this.canvas.height);
     // Set view port for FBO
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this.gl.useProgram(this.pointProgram);
+    _this.setAttribute(_this.pointProgram, "a_Position", _this.pointData.positionData, 2, "FLOAT");
+    _this.setAttribute(_this.pointProgram, "a_Level", _this.pointData.levelData, 1, "FLOAT");
+    _this.setAttribute(_this.pointProgram, "a_PointSize", _this.pointData.sizeData, 1, "FLOAT");
+    this.setUniform1i(this.pointProgram, 'group', LEVELGROUP[group]);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this.gl.drawArrays(this.gl.POINTS, 0, count);
   }
   drawScene() {
     let _this = this;
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
-    this.gl.viewport(0, 0, _this.canvas.width, _this.canvas.height); // Set view port for FBO
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    this.gl.viewport(0, 0, _this.canvas.width, _this.canvas.height);
     this.gl.useProgram(this.sceneProgram);
     this.setAttribute(this.sceneProgram, "a_texcoord", new Float32Array([
         0.0,
@@ -196,12 +207,16 @@ class GLRenderer {
         1.0,
         1.0
       ]), 2, "FLOAT");
-    this.setUniform1i(this.sceneProgram, 0);
+    this.setUniform1i(this.sceneProgram, 'u_sceneMap', 0);
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
   }
   update(count) {
-    this.drawPoint(count);
-    this.drawScene();
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    for(let group in LEVELGROUP){
+      this.drawPoint(group, count);
+      this.drawScene();
+    }
   }
   initFramebufferObject() {
     let _this = this;
@@ -271,6 +286,14 @@ class GLRenderer {
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
     return framebuffer;
+  }
+  setPointData(positionData, levelData, sizeData){
+    let _this = this;
+    _this.pointData = {
+      positionData,
+      levelData,
+      sizeData
+    };
   }
 }
 
