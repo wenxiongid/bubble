@@ -7,7 +7,8 @@ const BallRadiusMap = {
   4: getResponseDist(50),
   5: getResponseDist(60),
   6: getResponseDist(70),
-  7: getResponseDist(80)
+  7: getResponseDist(80),
+  8: getResponseDist(90)
 };
 
 export {

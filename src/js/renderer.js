@@ -6,7 +6,6 @@ uniform int group;
 attribute vec2 a_Position;
 attribute float a_Level;
 attribute float a_PointSize;
-// varying vec4 v_Inner;
 varying vec4 v_Color;
 
 void main() {
@@ -53,16 +52,13 @@ const fShader = `
 precision mediump float;
 #endif
 
-// varying vec4 v_Inner;
 varying vec4 v_Color;
 
 void main(){
   float d = length(gl_PointCoord - vec2(0.5, 0.5));
-  float fill = smoothstep(0.40, 0.20, d);
-  // float l = smoothstep(v_Inner.x, v_Inner.y, d) - smoothstep(v_Inner.z, v_Inner.w, d);
-  gl_FragColor = v_Color * fill;
-  // gl_FragColor = vec4(0.863, 0.196, 0.184, 1.0) * l;
-  // gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+  float c = smoothstep(0.40, 0.20, d);
+  c *= mix(0.82, 1.0, smoothstep(0.198, 0.28, d));
+  gl_FragColor = v_Color * c;
 }
 `;
 
@@ -85,22 +81,53 @@ precision mediump float;
 varying vec2 v_texcoord;
 uniform sampler2D u_sceneMap;
 uniform vec2 u_resolution;
+uniform int group;
 
 void main(){
   vec4 mapColor = texture2D(u_sceneMap, v_texcoord);
   float d = 0.0;
   vec4 color = vec4(0.0);
-  if(mapColor.r > 0.0){
-    d = smoothstep(0.65, 0.7, mapColor.r);
-    color += vec4(1.0, 0.0, 0.0, 1.0) * d;
+  if(group == 0){
+    if(mapColor.r > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.r);
+      color += vec4(0.86, 0.20, 0.18, 1.0) * d;
+    }
+    if(mapColor.g > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.g);
+      color += vec4(0.80, 0.29, 0.09, 1.0) * d;
+    }
+    if(mapColor.b > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.b);
+      color += vec4(0.71, 0.54, 0.00, 1.0) * d;
+    }
   }
-  if(mapColor.g > 0.0){
-    d = smoothstep(0.65, 0.7, mapColor.g);
-    color += vec4(0.0, 1.0, 0.0, 1.0) * d;
+  if(group == 1){
+    if(mapColor.r > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.r);
+      color += vec4(0.52, 0.60, 0.00, 1.0) * d;
+    }
+    if(mapColor.g > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.g);
+      color += vec4(0.16, 0.63, 0.60, 1.0) * d;
+    }
+    if(mapColor.b > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.b);
+      color += vec4(0.15, 0.55, 0.82, 1.0) * d;
+    }
   }
-  if(mapColor.b > 0.0){
-    d = smoothstep(0.65, 0.7, mapColor.b);
-    color += vec4(0.0, 0.0, 1.0, 1.0) * d;
+  if(group == 2){
+    if(mapColor.r > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.r);
+      color += vec4(0.42, 0.44, 0.77, 1.0) * d;
+    }
+    if(mapColor.g > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.g);
+      color += vec4(0.83, 0.21, 0.51, 1.0) * d;
+    }
+    if(mapColor.b > 0.0){
+      d = smoothstep(0.6, 0.7, mapColor.b);
+      color += vec4(1.0, 1.0, 1.0, 1.0) * d;
+    }
   }
   gl_FragColor = color;
   // gl_FragColor = mapColor;

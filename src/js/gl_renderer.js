@@ -11,7 +11,7 @@ class GLRenderer {
     this.canvas = canvas;
     this.gl = getWebGLContext(canvas, {
       preserveDrawingBuffer: true
-    });
+    }, false);
     if (!this.gl) {
       console.log("Failed to get the rendering context for WebGL");
       return;
@@ -164,11 +164,12 @@ class GLRenderer {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this.gl.drawArrays(this.gl.POINTS, 0, count);
   }
-  drawScene() {
+  drawScene(group) {
     let _this = this;
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
     this.gl.viewport(0, 0, _this.canvas.width, _this.canvas.height);
     this.gl.useProgram(this.sceneProgram);
+    this.setUniform1i(this.sceneProgram, "group", LEVELGROUP[group]);
     this.setAttribute(this.sceneProgram, "a_texcoord", new Float32Array([
         0.0,
         0.0,
@@ -215,7 +216,7 @@ class GLRenderer {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     for(let group in LEVELGROUP){
       this.drawPoint(group, count);
-      this.drawScene();
+      this.drawScene(group);
     }
   }
   initFramebufferObject() {

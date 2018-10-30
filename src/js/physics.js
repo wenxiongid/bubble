@@ -117,26 +117,26 @@ class Physics{
   mergeBall(srcBody, targetBody, callback){
     let _this = this;
     let dist = Math.sqrt(_this.getDistSq(srcBody.position, targetBody.position));
-    if(dist < srcBody.circleRadius + targetBody.circleRadius + 5){
-      Body.setStatic(srcBody, true);
-      srcBody.collisionFilter.mask = mergeCategory;
-      if (dist < 5) {
-        let newLevel = Math.min(targetBody.level + 1, 7);
-        let scale = BallRadiusMap[newLevel] / BallRadiusMap[targetBody.level];
-        Body.scale(targetBody, scale, scale);
-        Body.set(targetBody, { level: newLevel });
-        World.remove(_this.engine.world, srcBody);
-        callback && callback();
-        return;
-      }
-      let velovity = {
-        x: targetBody.position.x - srcBody.position.x,
-        y: targetBody.position.y - srcBody.position.y
-      };
-      velovity.x /= dist / 8;
-      velovity.y /= dist / 8;
-      Body.translate(srcBody, Vector.create(velovity.x, velovity.y));
+    // if(dist < srcBody.circleRadius + targetBody.circleRadius + 5){
+    Body.setStatic(srcBody, true);
+    srcBody.collisionFilter.mask = mergeCategory;
+    if (dist < 5) {
+      let newLevel = Math.min(targetBody.level + 1, 8);
+      let scale = BallRadiusMap[newLevel] / BallRadiusMap[targetBody.level];
+      Body.scale(targetBody, scale, scale);
+      Body.set(targetBody, { level: newLevel });
+      World.remove(_this.engine.world, srcBody);
+      callback && callback();
+      return;
     }
+    let velovity = {
+      x: targetBody.position.x - srcBody.position.x,
+      y: targetBody.position.y - srcBody.position.y
+    };
+    velovity.x /= dist / 8;
+    velovity.y /= dist / 8;
+    Body.translate(srcBody, Vector.create(velovity.x, velovity.y));
+    // }
   }
   checkCollision(){
     let _this = this;
@@ -146,10 +146,10 @@ class Physics{
       srcBody;
     for(let i = 0; i < bodies.length; i++){
       let bodyA = bodies[i];
-      if(!bodyA.isStatic && !bodyA.isMerging){
+      if(!bodyA.isStatic && !bodyA.isMerging && bodyA.level < 8){
         for(let j = i + 1; j < bodies.length; j++){
           let bodyB = bodies[j];
-          if (!bodyB.isStatic && !bodyB.isMerging && bodyA.level == bodyB.level && _this.getDistSq(bodyA.position, bodyB.position) <= 4 * bodyA.circleRadius * bodyA.circleRadius) {
+          if (!bodyB.isStatic && !bodyB.isMerging && bodyB.level < 8 && bodyA.level == bodyB.level && _this.getDistSq(bodyA.position, bodyB.position) <= 4 * bodyA.circleRadius * bodyA.circleRadius) {
             if (bodyA.position.y < bodyB.position.y) {
               targetBody = bodyA;
               srcBody = bodyB;
