@@ -9,7 +9,7 @@ if (window.Stats) {
   document.body.appendChild(stats.dom);
 }
 let canvas = getResizeEl(document.getElementById("webgl"));
-let myGame = new Game(canvas);
+let myGame = new Game(canvas, document.getElementById('pointWrapper'));
 animate();
 
 function animate(){
